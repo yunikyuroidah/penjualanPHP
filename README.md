@@ -1,0 +1,25 @@
+# PenjualanPHP
+
+Proyek ini merupakan sistem penjualan sederhana berbasis **PHP dan MySQL** yang dijalankan menggunakan **Laragon** sebagai local server environment.  
+Proyek ini dibuat untuk keperluan pribadi dan dokumentasi formal — **tidak ditujukan untuk penggunaan umum atau distribusi**.
+
+---
+
+## 🧰 Teknologi yang digunakan
+- **PHP** (Native)
+- **MySQL Database**
+- **Laragon** (Apache + PHPMyAdmin)
+- **HTML, CSS**
+
+---
+
+## 📸 Tampilan Aplikasi
+
+Berikut beberapa tampilan dari sistem yang dijalankan secara lokal menggunakan Laragon:
+
+| No | Tampilan | Gambar |
+|----|-----------|--------|
+| 1 | Halaman Login | ![Login](images/penjualanPHP%20(1).png) |
+| 2 | Halaman Dashboard | ![Dashboard](images/penjualanPHP%20(2).png) |
+| 3 | Halaman Transaksi | ![Transaksi](images/penjualanPHP%20(3).png) |
+| 4 | Halaman Data Transaksi | ![Data Transaksi](images/penjualanPHP%20(4).png) |
