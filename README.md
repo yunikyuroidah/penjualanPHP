@@ -19,7 +19,7 @@ Berikut beberapa tampilan dari sistem yang dijalankan secara lokal menggunakan L
 
 | No | Tampilan | Gambar |
 |----|-----------|--------|
-| 1 | Halaman Login | ![Login](https://raw.githubusercontent.com/yunikyuroidah/penjualanPHP/main/images/login.png) |
-| 2 | Halaman Dashboard | ![Dashboard](https://raw.githubusercontent.com/yunikyuroidah/penjualanPHP/main/images/dashboard.png) |
-| 3 | Halaman Transaksi | ![Transaksi](https://raw.githubusercontent.com/yunikyuroidah/penjualanPHP/main/images/transaksi.png) |
-| 4 | Halaman Data Transaksi | ![Data Transaksi](https://raw.githubusercontent.com/yunikyuroidah/penjualanPHP/main/images/datatransaksi.png) |
+| 1 | Halaman Login | ![Login](https://raw.githubusercontent.com/yunikyuroidah/penjualanPHP/login.png) |
+| 2 | Halaman Dashboard | ![Dashboard](https://raw.githubusercontent.com/yunikyuroidah/penjualanPHP/dashboard.png) |
+| 3 | Halaman Transaksi | ![Transaksi](https://raw.githubusercontent.com/yunikyuroidah/penjualanPHP/transaksi.png) |
+| 4 | Halaman Data Transaksi | ![Data Transaksi](https://raw.githubusercontent.com/yunikyuroidah/penjualanPHP/datatransaksi.png) |
