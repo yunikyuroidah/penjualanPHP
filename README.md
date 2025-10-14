@@ -1,7 +1,6 @@
 # PenjualanPHP
 
 Proyek ini merupakan sistem penjualan sederhana berbasis **PHP dan MySQL** yang dijalankan menggunakan **Laragon** sebagai local server environment.  
-Proyek ini dibuat untuk keperluan pribadi dan dokumentasi formal — **tidak ditujukan untuk penggunaan umum atau distribusi**.
 
 ---
 
