@@ -22,6 +22,6 @@ Berikut beberapa tampilan dari sistem yang dijalankan secara lokal menggunakan L
 | 3 | Halaman Transaksi | ![Transaksi1](https://github.com/yunikyuroidah/penjualanPHP/blob/674c1116d3a00fa68d4d34b2a25ccdfb199869ec/Transaksi1.png)<br>![Transaksi2](https://github.com/yunikyuroidah/penjualanPHP/blob/674c1116d3a00fa68d4d34b2a25ccdfb199869ec/Transaksi2.png) |
 | 4 | Halaman Barang | ![Barang1](https://github.com/yunikyuroidah/penjualanPHP/blob/674c1116d3a00fa68d4d34b2a25ccdfb199869ec/barang1.png)<br>![Barang2](https://github.com/yunikyuroidah/penjualanPHP/blob/674c1116d3a00fa68d4d34b2a25ccdfb199869ec/barang2.png) |
 | 5 | Halaman Laporan | ![Laporan](https://github.com/yunikyuroidah/penjualanPHP/blob/674c1116d3a00fa68d4d34b2a25ccdfb199869ec/laporan.png) |
-`hash_util.php`
+
 - Metode: pembagian (modulus 5) — nama barang di-hash berdasarkan nilai ASCII dan dimasukkan ke dalam 5 bucket.
 - Penggunaan: logika hash dipakai sebagai helper untuk lookup cepat di halaman transaksi dan manajemen barang. UI hanya menampilkan hasil pencarian (tanpa menyebut istilah "hash table"), sementara implementasi hash berada di sisi server.
