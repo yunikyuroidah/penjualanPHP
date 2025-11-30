@@ -36,7 +36,6 @@ $success = mysqli_query($conn, $sql);
         <div id="nav">
             <a href="../transaksi/index.php"><i class="fas fa-shopping-cart"></i> Form Transaksi</a>
             <a href="input_barang.php"><i class="fas fa-box"></i> Form Barang</a>
-            <a href="view_barang.php"><i class="fas fa-list"></i> Data Barang</a>
         </div>
 
         <h1><i class="fas fa-check-circle"></i> Hasil Input Barang</h1>

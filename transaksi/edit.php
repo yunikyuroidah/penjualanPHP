@@ -1,12 +1,43 @@
 <?php
 //include verifikasi.php pada file Administrasi
-include("../koneksi.php");
 session_start();
-
 require "../koneksi.php";
-$id = $_GET['id'];
-$query = mysqli_query($conn,"select * from transaksi where id='$id'");
-while($data = mysqli_fetch_array($query)){
+require_once "../hash_util.php";
+
+$id = isset($_GET['id']) ? $_GET['id'] : null;
+if ($id === null) {
+    header('Location: view.php');
+    exit;
+}
+
+$detailQuery = mysqli_query($conn, "SELECT * FROM transaksi WHERE id='" . mysqli_real_escape_string($conn, $id) . "' LIMIT 1");
+$data = mysqli_fetch_assoc($detailQuery);
+
+if (!$data) {
+    header('Location: view.php?notfound=1');
+    exit;
+}
+
+$allTransaksiQuery = mysqli_query($conn, "SELECT * FROM transaksi ORDER BY id DESC");
+$transaksiRows = [];
+while ($row = mysqli_fetch_assoc($allTransaksiQuery)) {
+    $transaksiRows[] = $row;
+}
+
+$hashTable = buildHashTable($transaksiRows, 'nama_barang');
+$flattenTransaksi = flattenHashTable($hashTable);
+$lookupKeyword = '';
+$lookupResults = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lookup_keyword'])) {
+    $lookupKeyword = trim($_POST['lookup_keyword']);
+    $lookupResults = hashTableSearch($hashTable, $lookupKeyword, 'nama_barang');
+    if ($lookupKeyword === '') {
+        $lookupResults = array_slice($flattenTransaksi, 0, 5);
+    }
+} else {
+    $lookupResults = array_slice($flattenTransaksi, 0, 5);
+}
 ?>
 
 <!DOCTYPE html>
@@ -33,10 +64,50 @@ while($data = mysqli_fetch_array($query)){
         <div id="nav">
             <a href="index.php"><i class="fas fa-shopping-cart"></i> Form Transaksi</a>
             <a href="../barang/input_barang.php"><i class="fas fa-box"></i> Form Barang</a>
-            <a href="view.php"><i class="fas fa-list"></i> Data Transaksi</a>
         </div>
 
         <h1><i class="fas fa-edit"></i> Edit Transaksi</h1>
+
+        <div class="card" style="margin-bottom: 25px;">
+            <h2 style="margin-bottom: 15px; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-search"></i> Pencarian Transaksi Terkait
+            </h2>
+            <p style="margin-bottom: 20px; color: #555;">
+                Gunakan pencarian untuk melihat transaksi lain dengan nama barang serupa.
+            </p>
+            <form method="post" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                <input type="text" name="lookup_keyword" class="form-control" placeholder="Masukkan nama barang" value="<?php echo htmlspecialchars($lookupKeyword); ?>" style="flex: 1 1 250px;">
+                <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-search"></i> Cari Transaksi
+                </button>
+            </form>
+            <?php if(count($lookupResults) > 0): ?>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-tag"></i> Nama Barang</th>
+                                <th><i class="fas fa-sort-numeric-up"></i> Qty</th>
+                                <th><i class="fas fa-receipt"></i> Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($lookupResults as $row): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['nama_barang']); ?></td>
+                                    <td><?php echo $row['jumlah']; ?></td>
+                                    <td>Rp <?php echo number_format($row['total'], 0, ',', '.'); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <div class="alert alert-danger" style="margin-top: 15px;">
+                    <i class="fas fa-exclamation-circle"></i> Transaksi dengan kata kunci "<?php echo htmlspecialchars($lookupKeyword); ?>" tidak ditemukan.
+                </div>
+            <?php endif; ?>
+        </div>
 
         <div class="card">
             <div class="form-container">
@@ -121,7 +192,6 @@ while($data = mysqli_fetch_array($query)){
             </div>
         </div>
     </div>
-    <?php } ?>
 </body>
 </html>  
 

@@ -1,6 +1,40 @@
 <?php
-include("../koneksi.php");
 session_start();
+require "../koneksi.php";
+require_once "../hash_util.php";
+
+$results_per_page = 10;
+$page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+$page = $page < 1 ? 1 : $page;
+
+$allBarangQuery = mysqli_query($conn, "SELECT * FROM barang ORDER BY id_barang ASC");
+$barangRows = [];
+while ($row = mysqli_fetch_assoc($allBarangQuery)) {
+    $barangRows[] = $row;
+}
+
+$hashTable = buildHashTable($barangRows, 'nama_barang');
+$flattenBarang = flattenHashTable($hashTable);
+$lookupKeyword = '';
+$lookupResults = array_slice($flattenBarang, 0, 5);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lookup_keyword'])) {
+    $lookupKeyword = trim($_POST['lookup_keyword']);
+    $lookupResults = hashTableSearch($hashTable, $lookupKeyword, 'nama_barang');
+    if ($lookupKeyword === '') {
+        $lookupResults = array_slice($flattenBarang, 0, 5);
+    }
+}
+
+$total_records = count($barangRows);
+$total_pages = $total_records > 0 ? (int) ceil($total_records / $results_per_page) : 1;
+
+if ($page > $total_pages) {
+    $page = $total_pages;
+}
+
+$start_from = ($page - 1) * $results_per_page;
+$displayedBarang = array_slice($barangRows, $start_from, $results_per_page);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -31,28 +65,55 @@ session_start();
         <div id="nav">
             <a href="../transaksi/index.php"><i class="fas fa-shopping-cart"></i> Form Transaksi</a>
             <a href="input_barang.php"><i class="fas fa-plus"></i> Form Barang</a>
-            <a href="view_barang.php"><i class="fas fa-list"></i> Data Barang</a>
         </div>
 
         <h1><i class="fas fa-boxes"></i> Data Master Barang</h1>
 
-        <div class="card">
-            <!-- Search Form -->
-            <div class="search-form">
-                <form method="post" action="" style="display: flex; justify-content: center; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <input type="text" name="search" placeholder="Cari berdasarkan nama barang..." value="<?php echo isset($_POST['search']) ? $_POST['search'] : ''; ?>">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search"></i> Cari
-                    </button>
-                    <?php if(isset($_POST['search'])): ?>
-                        <a href="view_barang.php" class="btn btn-warning">
-                            <i class="fas fa-times"></i> Reset
-                        </a>
-                    <?php endif; ?>
-                </form>
-            </div>
+        <div class="card" style="margin-bottom: 25px;">
+            <h2 style="margin-bottom: 15px; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-search"></i> Cari Barang Cepat
+            </h2>
+            <p style="margin-bottom: 20px; color: #555;">
+                Gunakan pencarian ini untuk referensi singkat tanpa mengubah daftar utama.
+            </p>
+            <form method="post" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                <input type="text" name="lookup_keyword" class="form-control" placeholder="Masukkan nama barang" value="<?php echo htmlspecialchars($lookupKeyword); ?>" style="flex: 1 1 250px;">
+                <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-search"></i> Cari Barang
+                </button>
+                <?php if($lookupKeyword !== ''): ?>
+                    <a href="view_barang.php" class="btn btn-warning" style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-undo"></i> Muat Semua
+                    </a>
+                <?php endif; ?>
+            </form>
+            <?php if(count($lookupResults) > 0): ?>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-tag"></i> Nama Barang</th>
+                                <th><i class="fas fa-money-bill"></i> Harga Barang</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($lookupResults as $row): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['nama_barang']); ?></td>
+                                    <td>Rp <?php echo number_format($row['harga_barang'], 0, ',', '.'); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <div class="alert alert-danger" style="margin-top: 15px;">
+                    <i class="fas fa-exclamation-circle"></i> Barang dengan kata kunci "<?php echo htmlspecialchars($lookupKeyword); ?>" tidak ditemukan.
+                </div>
+            <?php endif; ?>
+        </div>
 
-            <!-- Table Container -->
+        <div class="card">
             <div class="table-container">
                 <table>
                     <thead>
@@ -64,35 +125,10 @@ session_start();
                         </tr>
                     </thead>
                     <tbody>
-                        <?php
-                        $results_per_page = 10;
-
-                        if (!isset($_GET['page'])) {
-                            $page = 1;
-                        } else {
-                            $page = $_GET['page'];
-                        }
-
-                        $start_from = ($page - 1) * $results_per_page;
-
-                        if(isset($_POST['search'])) {
-                            $search = $_POST['search'];
-                            $query = mysqli_query($conn, "SELECT * FROM barang WHERE nama_barang LIKE '%$search%' ORDER BY id_barang ASC LIMIT $start_from, $results_per_page");
-                        } else {
-                            $query = mysqli_query($conn, "SELECT * FROM barang ORDER BY id_barang ASC LIMIT $start_from, $results_per_page");
-                        }
-
-                        $total_pages_query = "SELECT COUNT(*) as total FROM barang";
-                        $result = mysqli_query($conn, $total_pages_query);
-                        $row = mysqli_fetch_assoc($result);
-                        $total_pages = ceil($row["total"] / $results_per_page);
-
-                        if(mysqli_num_rows($query) > 0):
-                            $no = $start_from + 1;
-                            while($data = mysqli_fetch_array($query)):
-                        ?>
+                        <?php if(count($displayedBarang) > 0): ?>
+                            <?php foreach ($displayedBarang as $index => $data): ?>
                                 <tr>
-                                    <td><?php echo $no; ?></td>
+                                    <td><?php echo $start_from + $index + 1; ?></td>
                                     <td><?php echo htmlspecialchars($data["nama_barang"]); ?></td>
                                     <td>Rp <?php echo number_format($data["harga_barang"], 0, ',', '.'); ?></td>
                                     <td>
@@ -108,19 +144,12 @@ session_start();
                                         </div>
                                     </td>
                                 </tr>
-                        <?php 
-                                $no++; 
-                            endwhile; 
-                        else: 
-                        ?>
+                            <?php endforeach; ?>
+                        <?php else: ?>
                             <tr>
-                                <td colspan="4" style="text-align: center; padding: 40px; color: #999;">
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #999;">
                                     <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
-                                    <?php if(isset($_POST['search'])): ?>
-                                        Data dengan kata kunci "<?php echo htmlspecialchars($_POST['search']); ?>" tidak ditemukan
-                                    <?php else: ?>
-                                        Belum ada data barang
-                                    <?php endif; ?>
+                                    Belum ada data barang
                                 </td>
                             </tr>
                         <?php endif; ?>
@@ -129,7 +158,7 @@ session_start();
             </div>
 
             <!-- Pagination -->
-            <?php if($total_pages > 1): ?>
+            <?php if($total_pages > 1 && $total_records > 0): ?>
                 <div class="pagination">
                     <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                         <a href="?page=<?php echo $i; ?>" <?php echo ($i == $page) ? 'class="active"' : ''; ?>>

@@ -78,7 +78,6 @@ $success = mysqli_query($conn, $sql);
         <div id="nav">
             <a href="index.php"><i class="fas fa-shopping-cart"></i> Form Transaksi</a>
             <a href="../barang/input_barang.php"><i class="fas fa-box"></i> Form Barang</a>
-            <a href="view.php"><i class="fas fa-list"></i> Lihat Transaksi</a>
         </div>
 
         <h1><i class="fas fa-receipt"></i> Hasil Transaksi</h1>

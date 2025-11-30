@@ -1,7 +1,29 @@
 <?php
 //include verifikasi.php pada file Administrasi
-include("../koneksi.php");
 session_start();
+require "../koneksi.php";
+require_once "../hash_util.php";
+
+$barangQuery = mysqli_query($conn, "SELECT * FROM barang ORDER BY nama_barang ASC");
+$barangRows = [];
+while ($row = mysqli_fetch_assoc($barangQuery)) {
+    $barangRows[] = $row;
+}
+
+$hashTable = buildHashTable($barangRows, 'nama_barang');
+$flattenBarang = flattenHashTable($hashTable);
+$lookupKeyword = '';
+$lookupResults = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lookup_keyword'])) {
+    $lookupKeyword = trim($_POST['lookup_keyword']);
+    $lookupResults = hashTableSearch($hashTable, $lookupKeyword, 'nama_barang');
+    if ($lookupKeyword === '') {
+        $lookupResults = array_slice($flattenBarang, 0, 5);
+    }
+} else {
+    $lookupResults = array_slice($flattenBarang, 0, 5);
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -27,10 +49,48 @@ session_start();
         <div id="nav">
             <a href="../transaksi/index.php"><i class="fas fa-shopping-cart"></i> Form Transaksi</a>
             <a href="input_barang.php"><i class="fas fa-box"></i> Form Barang</a>
-            <a href="view_barang.php"><i class="fas fa-list"></i> Data Barang</a>
         </div>
 
         <h1><i class="fas fa-cube"></i> Form Input Barang</h1>
+
+        <div class="card" style="margin-bottom: 25px;">
+            <h2 style="margin-bottom: 15px; color: #667eea; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-search"></i> Cek Barang Eksisting
+            </h2>
+            <p style="margin-bottom: 20px; color: #555;">
+                Lakukan pencarian cepat untuk memastikan barang belum terdaftar pada sistem.
+            </p>
+            <form method="post" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                <input type="text" name="lookup_keyword" class="form-control" placeholder="Masukkan nama barang" value="<?php echo htmlspecialchars($lookupKeyword); ?>" style="flex: 1 1 250px;">
+                <button type="submit" class="btn btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-search"></i> Cari Barang
+                </button>
+            </form>
+            <?php if(count($lookupResults) > 0): ?>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-tag"></i> Nama Barang</th>
+                                <th><i class="fas fa-money-bill"></i> Harga</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($lookupResults as $row): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['nama_barang']); ?></td>
+                                    <td>Rp <?php echo number_format($row['harga_barang'], 0, ',', '.'); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php else: ?>
+                <div class="alert alert-success" style="margin-top: 15px;">
+                    <i class="fas fa-check-circle"></i> Tidak ditemukan barang dengan kata kunci "<?php echo htmlspecialchars($lookupKeyword); ?>".
+                </div>
+            <?php endif; ?>
+        </div>
 
         <div class="card">
             <div class="form-container">
@@ -65,6 +125,9 @@ session_start();
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0;">
                 <a href="view_barang.php" class="btn btn-success" style="min-width: 200px;">
                     <i class="fas fa-list-ul"></i> Lihat Data Barang
+                </a>
+                <a href="../admin.php" class="btn btn-warning" style="min-width: 200px; margin-left: 15px;">
+                    <i class="fas fa-home"></i> Beranda
                 </a>
             </div>
         </div>

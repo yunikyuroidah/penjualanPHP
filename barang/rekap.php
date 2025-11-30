@@ -10,6 +10,95 @@ include("../koneksi.php");
     <title>Laporan Rekap - Sistem Penjualan</title>
     <link rel="stylesheet" href="../style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .summary-card {
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+        .summary-card i {
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+        .summary-card.gradient-blue { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+        .summary-card.gradient-green { background: linear-gradient(45deg, #56ab2f, #a8e6cf); }
+        .summary-card.gradient-pink { background: linear-gradient(45deg, #f093fb, #f5576c); }
+        .report-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .report-card {
+            background: #fff;
+            border: 1px solid #e0e7ff;
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+        }
+        .report-card i {
+            font-size: 32px;
+            color: #667eea;
+        }
+        .report-card p {
+            margin: 0;
+            color: #555;
+            line-height: 1.5;
+        }
+        .report-card button {
+            width: 100%;
+        }
+        .report-card.active {
+            border-color: #667eea;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.25);
+            transform: translateY(-2px);
+        }
+        .print-only { display: none; }
+        @media print {
+            body { background: #fff; color: #000; }
+            .container { box-shadow: none; }
+            .header, #nav, .logout-btn { display: none !important; }
+            .card { box-shadow: none; border: none; padding: 0; }
+            .summary-card {
+                background: #fff !important;
+                color: #000 !important;
+                border: 1px solid #ccc;
+                box-shadow: none;
+            }
+            .summary-card i { color: #000 !important; }
+            .report-card {
+                border: 1px solid #ccc;
+                box-shadow: none;
+                transform: none !important;
+            }
+            .report-card i { color: #000; }
+            .report-card button { display: none !important; }
+            .report-selector { gap: 12px; }
+            .table-container { box-shadow: none; margin-bottom: 25px; page-break-inside: avoid; }
+            table { border-collapse: collapse; }
+            table th, table td {
+                border: 1px solid #444 !important;
+                color: #000 !important;
+                padding: 8px !important;
+            }
+            .btn { display: none !important; }
+            .print-only { display: block; margin-bottom: 20px; font-size: 14px; color: #555; }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -26,14 +115,16 @@ include("../koneksi.php");
         <div id="nav">
             <a href="../transaksi/index.php"><i class="fas fa-shopping-cart"></i> Form Transaksi</a>
             <a href="input_barang.php"><i class="fas fa-box"></i> Form Barang</a>
-            <a href="view_barang.php"><i class="fas fa-list"></i> Data Barang</a>
         </div>
 
         <h1><i class="fas fa-chart-bar"></i> Laporan Rekap Penjualan</h1>
+        <div class="print-only">
+            Dicetak pada: <?php echo date('d F Y H:i'); ?> WIB
+        </div>
 
         <div class="card">
             <!-- Summary Cards -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div class="summary-grid">
                 <?php
                 // Total Barang
                 $total_barang = mysqli_query($conn, "SELECT COUNT(*) as count FROM barang");
@@ -48,40 +139,62 @@ include("../koneksi.php");
                 $revenue = mysqli_fetch_assoc($total_revenue)['revenue'] ?? 0;
                 ?>
                 
-                <div style="background: linear-gradient(45deg, #4facfe, #00f2fe); padding: 20px; border-radius: 15px; text-align: center; color: white;">
-                    <i class="fas fa-box" style="font-size: 32px; margin-bottom: 10px;"></i>
+                <div class="summary-card gradient-blue">
+                    <i class="fas fa-box"></i>
                     <h3 style="margin: 0; font-size: 24px;"><?php echo $barang_count; ?></h3>
-                    <p style="margin: 5px 0 0 0; opacity: 0.9;">Total Barang</p>
+                    <p style="margin: 0; opacity: 0.9;">Total Barang</p>
                 </div>
 
-                <div style="background: linear-gradient(45deg, #56ab2f, #a8e6cf); padding: 20px; border-radius: 15px; text-align: center; color: white;">
-                    <i class="fas fa-shopping-cart" style="font-size: 32px; margin-bottom: 10px;"></i>
+                <div class="summary-card gradient-green">
+                    <i class="fas fa-shopping-cart"></i>
                     <h3 style="margin: 0; font-size: 24px;"><?php echo $transaksi_count; ?></h3>
-                    <p style="margin: 5px 0 0 0; opacity: 0.9;">Total Transaksi</p>
+                    <p style="margin: 0; opacity: 0.9;">Total Transaksi</p>
                 </div>
 
-                <div style="background: linear-gradient(45deg, #f093fb, #f5576c); padding: 20px; border-radius: 15px; text-align: center; color: white;">
-                    <i class="fas fa-money-bill-wave" style="font-size: 32px; margin-bottom: 10px;"></i>
+                <div class="summary-card gradient-pink">
+                    <i class="fas fa-money-bill-wave"></i>
                     <h3 style="margin: 0; font-size: 18px;">Rp <?php echo number_format($revenue, 0, ',', '.'); ?></h3>
-                    <p style="margin: 5px 0 0 0; opacity: 0.9;">Total Pendapatan</p>
+                    <p style="margin: 0; opacity: 0.9;">Total Pendapatan</p>
                 </div>
             </div>
 
             <!-- Filter Options -->
-            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                <h3 style="margin-bottom: 15px; color: #667eea;">
+            <div style="background: #f8f9fa; padding: 25px; border-radius: 15px; margin-bottom: 30px;">
+                <h3 style="margin-bottom: 10px; color: #667eea; display: flex; align-items: center; gap: 10px;">
                     <i class="fas fa-filter"></i> Pilih Jenis Laporan
                 </h3>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <button onclick="showReport('inner')" class="btn btn-primary" style="font-size: 14px;">
-                        <i class="fas fa-link"></i> Inner Join (Barang Terjual)
-                    </button>
-                    <button onclick="showReport('left')" class="btn btn-success" style="font-size: 14px;">
-                        <i class="fas fa-list"></i> Left Join (Semua Barang)
-                    </button>
-                    <button onclick="showReport('right')" class="btn btn-warning" style="font-size: 14px;">
-                        <i class="fas fa-exchange-alt"></i> Right Join (Semua Transaksi)
-                    </button>
+                <p style="margin: 0; color: #555;">Pilih tampilan data yang diinginkan untuk menganalisis performa penjualan.</p>
+                <div class="report-selector">
+                    <div class="report-card" id="card-inner">
+                        <i class="fas fa-link"></i>
+                        <div>
+                            <strong>Inner Join</strong>
+                            <p>Menampilkan barang yang sudah terjual lengkap dengan jumlah dan total penjualannya.</p>
+                        </div>
+                        <button type="button" onclick="showReport('inner', 'card-inner')" class="btn btn-primary">
+                            <i class="fas fa-eye"></i> Tampilkan Laporan
+                        </button>
+                    </div>
+                    <div class="report-card" id="card-left">
+                        <i class="fas fa-list"></i>
+                        <div>
+                            <strong>Left Join</strong>
+                            <p>Daftar seluruh barang, termasuk status apakah sudah memiliki transaksi atau belum.</p>
+                        </div>
+                        <button type="button" onclick="showReport('left', 'card-left')" class="btn btn-success">
+                            <i class="fas fa-eye"></i> Tampilkan Laporan
+                        </button>
+                    </div>
+                    <div class="report-card" id="card-right">
+                        <i class="fas fa-exchange-alt"></i>
+                        <div>
+                            <strong>Right Join</strong>
+                            <p>Menampilkan semua transaksi terbaru beserta nilai total dan kuantitasnya.</p>
+                        </div>
+                        <button type="button" onclick="showReport('right', 'card-right')" class="btn btn-warning">
+                            <i class="fas fa-eye"></i> Tampilkan Laporan
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -225,10 +338,7 @@ include("../koneksi.php");
 
             <!-- Actions -->
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 2px solid #f0f0f0;">
-                <a href="view_barang.php" class="btn btn-primary" style="margin-right: 15px;">
-                    <i class="fas fa-arrow-left"></i> Kembali ke Data Barang
-                </a>
-                <button onclick="window.print()" class="btn btn-success">
+                <button type="button" onclick="window.print()" class="btn btn-success">
                     <i class="fas fa-print"></i> Print Laporan
                 </button>
             </div>
@@ -236,7 +346,7 @@ include("../koneksi.php");
     </div>
 
     <script>
-        function showReport(type) {
+        function showReport(type, cardId) {
             // Hide all reports
             document.getElementById('inner-report').style.display = 'none';
             document.getElementById('left-report').style.display = 'none';
@@ -245,16 +355,20 @@ include("../koneksi.php");
             // Show selected report
             document.getElementById(type + '-report').style.display = 'block';
             
-            // Update button styles
-            const buttons = document.querySelectorAll('button[onclick^="showReport"]');
-            buttons.forEach(btn => {
-                btn.style.opacity = '0.7';
-                btn.style.transform = 'none';
-            });
-            
-            event.target.style.opacity = '1';
-            event.target.style.transform = 'translateY(-2px)';
+            // Update card highlighting
+            const cards = document.querySelectorAll('.report-card');
+            cards.forEach(card => card.classList.remove('active'));
+            if (cardId) {
+                const activeCard = document.getElementById(cardId);
+                if (activeCard) {
+                    activeCard.classList.add('active');
+                }
+            }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            showReport('inner', 'card-inner');
+        });
     </script>
 </body>
 </html>
