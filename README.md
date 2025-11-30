@@ -24,4 +24,4 @@ Berikut beberapa tampilan dari sistem yang dijalankan secara lokal menggunakan L
 | 5 | Halaman Laporan | ![Laporan](https://github.com/yunikyuroidah/penjualanPHP/blob/674c1116d3a00fa68d4d34b2a25ccdfb199869ec/laporan.png) |
 
 - Metode: pembagian (modulus 5) — nama barang di-hash berdasarkan nilai ASCII dan dimasukkan ke dalam 5 bucket.
-- Penggunaan: logika hash dipakai sebagai helper untuk lookup cepat di halaman transaksi dan manajemen barang. UI hanya menampilkan hasil pencarian (tanpa menyebut istilah "hash table"), sementara implementasi hash berada di sisi server.
+- Penggunaan: logika hash dipakai sebagai helper untuk lookup cepat di halaman transaksi dan manajemen barang. UI hanya menampilkan hasil pencarian, sementara implementasi hash berada di sisi server.
